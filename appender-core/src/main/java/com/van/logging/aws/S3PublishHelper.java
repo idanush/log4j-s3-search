@@ -32,7 +32,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class S3PublishHelper implements IPublishHelper<Event> {
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-    private static final String S3ERRCODE_BUCKETALREADYOWNEDBYYOU = "BucketAlreadyOwnedByYou";
+    // private static final String S3ERRCODE_BUCKETALREADYOWNEDBYYOU = "BucketAlreadyOwnedByYou";
 
     private final AmazonS3Client client;
     private final String bucket;
@@ -101,12 +101,13 @@ public class S3PublishHelper implements IPublishHelper<Event> {
                 // System.out.println(String.format("Publishing content of %s to S3.", tempFile));
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentLength(tempFile.length());
-                metadata.setContentType(ContentType.DEFAULT_BINARY.getMimeType());
+                String contentType = compressEnabled ? "application/x-gzip" : ContentType.DEFAULT_TEXT.getMimeType();
+                metadata.setContentType(contentType);
 
                 PutObjectRequest por = new PutObjectRequest(bucket, key, tempFile);
                 por.setMetadata(metadata);
 
-                PutObjectResult result = client.putObject(por);
+               //  PutObjectResult result = client.putObject(por);
                 /* System.out.println(String.format("Content MD5: %s",
                     result.getContentMd5())); */
             }
