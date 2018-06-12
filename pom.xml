@@ -14,8 +14,6 @@
 
     <modules>
         <module>appender-core</module>
-        <module>appender-log4j</module>
-        <module>appender-log4j-sample</module>
         <module>appender-log4j2</module>
         <module>appender-log4j2-sample</module>
     </modules>
@@ -24,20 +22,18 @@
         <dependencies>
             <dependency>
                 <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk</artifactId>
+                <artifactId>aws-java-sdk-core</artifactId>
                 <version>1.11.158</version>
             </dependency>
-
             <dependency>
-                <groupId>org.apache.solr</groupId>
-                <artifactId>solr-solrj</artifactId>
-                <version>6.6.0</version>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-kms</artifactId>
+                <version>1.11.158</version>
             </dependency>
-
             <dependency>
-                <groupId>org.elasticsearch.client</groupId>
-                <artifactId>transport</artifactId>
-                <version>5.4.3</version>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>1.11.158</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

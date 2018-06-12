@@ -15,21 +15,21 @@ import java.util.Objects;
  * The composite appender used to route log messages to various outlets. The name will have "CVL" prepended for
  * name spacing when configuring.
  */
-@Plugin(name = "Log4j2Appender", category = "Core", elementType = "appender")
-public class Log4j2Appender extends AbstractAppender {
+@Plugin(name = "S3Appender", category = "Core", elementType = "appender")
+public class S3Appender extends AbstractAppender {
 
     private LoggingEventCache<Event> eventCache = null;
     private boolean verbose = false;
 
     @PluginBuilderFactory
-    public static org.apache.logging.log4j.core.util.Builder<Log4j2Appender> newBuilder() {
-        return new Log4j2AppenderBuilder();
+    public static org.apache.logging.log4j.core.util.Builder<S3Appender> newBuilder() {
+        return new S3AppenderBuilder();
     }
 
-    Log4j2Appender(String name,
-                   Filter filter,
-                   Layout<? extends Serializable> layout,
-                   boolean ignoreExceptions, LoggingEventCache<Event> eventCache) {
+    S3Appender(String name,
+               Filter filter,
+               Layout<? extends Serializable> layout,
+               boolean ignoreExceptions, LoggingEventCache<Event> eventCache) {
         super(name, filter, layout, ignoreExceptions);
         Objects.requireNonNull(eventCache);
         this.eventCache = eventCache;
@@ -48,7 +48,7 @@ public class Log4j2Appender extends AbstractAppender {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        LOGGER.debug(String.format("Log4j2Appender says: %s", logEvent.getMessage().getFormattedMessage()));
+        LOGGER.debug(String.format("S3Appender says: %s", logEvent.getMessage().getFormattedMessage()));
     }
 
 

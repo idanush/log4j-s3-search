@@ -7,10 +7,6 @@ import com.van.logging.*;
 import com.van.logging.aws.AwsClientBuilder;
 import com.van.logging.aws.S3Configuration;
 import com.van.logging.aws.S3PublishHelper;
-import com.van.logging.elasticsearch.ElasticsearchConfiguration;
-import com.van.logging.elasticsearch.ElasticsearchPublishHelper;
-import com.van.logging.solr.SolrConfiguration;
-import com.van.logging.solr.SolrPublishHelper;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
@@ -20,8 +16,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appender.AbstractAppender.Builder
-    implements org.apache.logging.log4j.core.util.Builder<Log4j2Appender> {
+public class S3AppenderBuilder extends org.apache.logging.log4j.core.appender.AbstractAppender.Builder
+    implements org.apache.logging.log4j.core.util.Builder<S3Appender> {
 
     // general properties
     @PluginBuilderAttribute
@@ -55,32 +51,14 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
     @PluginBuilderAttribute
     private String s3Compression;
 
-    // Solr properties
-    @PluginBuilderAttribute
-    private String solrUrl;
-
-    // Elasticsearch properties
-    @PluginBuilderAttribute
-    private String elasticsearchCluster;
-
-    @PluginBuilderAttribute
-    private String elasticsearchIndex;
-
-    @PluginBuilderAttribute
-    private String elasticsearchType;
-
-    @PluginBuilderAttribute
-    private String elasticsearchHosts;
-
-
     @Override
     @SuppressWarnings("unchecked")
-    public Log4j2Appender build() {
+    public S3Appender build() {
         try {
             String cacheName = UUID.randomUUID().toString().replaceAll("-","");
             LoggingEventCache<Event> cache = new LoggingEventCache<>(
                 cacheName, createCacheMonitor(), createCachePublisher());
-            return installFilter(new Log4j2Appender(
+            return installFilter(new S3Appender(
                     getName(), getFilter(), getLayout(),
                     true, cache));
         } catch (Exception e) {
@@ -88,7 +66,7 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
         }
     }
 
-    Log4j2Appender installFilter(Log4j2Appender appender) {
+    S3Appender installFilter(S3Appender appender) {
         appender.addFilter(new AbstractFilter() {
             @Override
             public Result filter(final LogEvent event) {
@@ -120,27 +98,6 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
                                  config.getSecretKey()).build(AmazonS3Client.class));
     }
 
-    static Optional<SolrConfiguration> getSolrConfigurationIfEnabled(String solrUrl) {
-        SolrConfiguration config = null;
-        if (null != solrUrl) {
-            config = new SolrConfiguration();
-            config.setUrl(solrUrl);
-        }
-        return Optional.ofNullable(config);
-    }
-
-    static Optional<ElasticsearchConfiguration> getElasticsearchConfigIfEnabled(String elasticsearchHosts) {
-        ElasticsearchConfiguration config = null;
-        if (null != elasticsearchHosts) {
-            config = new ElasticsearchConfiguration();
-            String hostArray[] = elasticsearchHosts.split("[;\\s,]");
-            for (String entry: hostArray) {
-                config.addHost(entry);
-            }
-        }
-        return Optional.ofNullable(config);
-    }
-
     IBufferPublisher<Event> createCachePublisher() throws UnknownHostException {
 
         java.net.InetAddress addr = java.net.InetAddress.getLocalHost();
@@ -154,22 +111,6 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
             }
             publisher.addHelper(new S3PublishHelper((AmazonS3Client)client,
                 s3Bucket, s3Path, Boolean.parseBoolean(s3Compression)));
-        });
-
-        getSolrConfigurationIfEnabled(solrUrl).ifPresent(config -> {
-            if (verbose) {
-                System.out.println(String.format(
-                    "Registering SOLR publish helper -> %s", config));
-            }
-            publisher.addHelper(new SolrPublishHelper(config.getUrl()));
-        });
-
-        getElasticsearchConfigIfEnabled(elasticsearchHosts).ifPresent(config -> {
-            if (verbose) {
-                System.out.println(String.format(
-                    "Registering Elasticsearch publish helper -> %s", config));
-            }
-            publisher.addHelper(new ElasticsearchPublishHelper(config));
         });
 
         return publisher;
